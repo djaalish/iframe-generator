@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iframe Generator — Minimal Tool</title>
+  <meta name="description" content="Generate clean, responsive iframe embed code with live preview." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+  --bg: #0b0f14;
+  --bg-alt: #0f1520;
+  --panel: #121a24;
+  --stroke: #1f2937;
+  --text: #e5eef9;
+  --muted: #9fb0c7;
+  --accent: #58a6ff;
+  --accent-2: #22d3ee;
+  --success: #22c55e;
+  --radius: 14px;
+  --shadow: 0 12px 36px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
+  background:linear-gradient(180deg,var(--bg),var(--bg-alt));
+  line-height:1.6;
+}
+
+.container{width:min(1100px,92%); margin-inline:auto}
+.section{padding:80px 0}
+.section-alt{background:rgba(255,255,255,.02)}
+
+.site-header{
+  position:sticky; top:0; z-index:50;
+  backdrop-filter:saturate(180%) blur(8px);
+  background:rgba(11,15,20,.6);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.header{display:flex; align-items:center; justify-content:space-between; padding:14px 0}
+.brand{color:var(--text); text-decoration:none; font-weight:800; letter-spacing:.3px}
+.nav a{color:var(--muted); text-decoration:none; margin-left:16px}
+.nav a:hover{color:var(--text)}
+
+.btn{
+  display:inline-block; padding:12px 18px; border-radius:12px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#061219; font-weight:700;
+  box-shadow:0 8px 24px rgba(34,211,238,.2);
+}
+.btn:hover{filter:brightness(1.05)}
+.btn-ghost{
+  background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.14)
+}
+.btn-outline{
+  background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.18)
+}
+
+.hero{padding:120px 0 80px}
+.grid-2{display:grid; grid-template-columns:1.1fr .9fr; gap:36px; align-items:center}
+.lead{color:#cbd5e1; max-width:55ch}
+.hero-card{
+  background:var(--panel); border:1px solid var(--stroke); border-radius:var(--radius);
+  padding:18px; box-shadow:var(--shadow)
+}
+.badge{
+  display:inline-block; padding:6px 10px; border-radius:999px; font-size:.78rem;
+  background:rgba(88,166,255,.15); color:var(--accent); border:1px solid rgba(88,166,255,.3);
+}
+.snippet{
+  display:block; color:#c9e0ff; background:#0c131b; border:1px solid rgba(255,255,255,.08);
+  border-radius:10px; padding:14px; margin-top:10px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  white-space:nowrap; overflow:auto;
+}
+
+.form{display:grid; gap:16px}
+label{display:grid; gap:8px}
+.hint{color:var(--muted); font-size:.85rem}
+input, select, textarea{
+  background:#0f1620; color:var(--text); border:1px solid rgba(255,255,255,.12);
+  border-radius:10px; padding:12px 14px; outline:none; font:inherit;
+}
+input:focus, select:focus, textarea:focus{border-color:var(--accent)}
+
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.check{display:flex; gap:10px; align-items:center}
+.sandbox{
+  border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px 14px; background:rgba(255,255,255,.02)
+}
+.actions{display:flex; gap:10px; margin-top:6px}
+
+.output{
+  margin-top:12px; background:var(--panel); border:1px solid var(--stroke); border-radius:var(--radius); padding:16px
+}
+.output-actions{margin-top:10px}
+
+.preview-wrap{
+  background:#0c131b; border:1px solid rgba(255,255,255,.08); border-radius:var(--radius);
+  overflow:hidden; position:relative;
+}
+.preview-wrap iframe{width:100%; height:100%; border:0; display:block}
+.ratio-16x9{aspect-ratio:16/9}
+
+.about{display:flex; align-items:center; justify-content:space-between; gap:20px}
+.links .backlink{
+  color:var(--accent); text-decoration:none; background:rgba(88,166,255,.12); padding:10px 12px; border-radius:10px; border:1px solid rgba(88,166,255,.25)
+}
+.links .backlink:hover{filter:brightness(1.05)}
+
+.site-footer{border-top:1px solid rgba(255,255,255,.08); padding:24px 0; color:var(--muted)}
+.footer{display:flex; align-items:center; justify-content:space-between}
+.to-top{color:var(--text); text-decoration:none; background:rgba(255,255,255,.06); padding:8px 12px; border-radius:8px}
+
+@media (max-width: 900px){
+  .grid-2{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+}
+
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header">
+      <a class="brand" href="#top">Iframe Generator</a>
+      <nav class="nav">
+        <a href="#generator">Generator</a>
+        <a href="#preview">Preview</a>
+        <a href="#about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section id="hero" class="section hero">
+      <div class="container grid-2">
+        <div>
+          <h1>Generate clean iframe code</h1>
+          <p class="lead">A modern, minimal tool to create responsive iframe embeds with best‑practice attributes and live preview.</p>
+          <a href="#generator" class="btn">Start Generating</a>
+        </div>
+        <div class="hero-card">
+          <div class="badge">Live Preview</div>
+          <code class="snippet">
+            &lt;iframe src="https://example.com" loading="lazy"&gt;&lt;/iframe&gt;
+          </code>
+        </div>
+      </div>
+    </section>
+
+    <section id="generator" class="section section-alt">
+      <div class="container">
+        <h2>Iframe Generator</h2>
+        <form id="genForm" class="form" novalidate>
+          <div class="grid-2">
+            <label>
+              <span>URL to embed</span>
+              <input type="url" name="src" placeholder="https://example.com" required />
+              <small class="hint">Use HTTPS where possible for fewer browser restrictions.</small>
+            </label>
+            <label>
+              <span>Title (accessibility)</span>
+              <input type="text" name="title" placeholder="Embedded content" />
+              <small class="hint">Describe the content for screen readers.</small>
+            </label>
+          </div>
+
+          <div class="grid-3">
+            <label>
+              <span>Width (px or %)</span>
+              <input type="text" name="width" placeholder="100%" value="100%" />
+            </label>
+            <label>
+              <span>Height (px)</span>
+              <input type="number" name="height" placeholder="400" value="400" min="100" />
+            </label>
+            <label class="check">
+              <input type="checkbox" name="responsive" checked />
+              <span>Make responsive (16:9)</span>
+            </label>
+          </div>
+
+          <div class="grid-3">
+            <label class="check">
+              <input type="checkbox" name="allowfullscreen" />
+              <span>Allow fullscreen</span>
+            </label>
+            <label>
+              <span>Referrer Policy</span>
+              <select name="referrerpolicy">
+                <option value="">Default</option>
+                <option value="no-referrer">no-referrer</option>
+                <option value="origin">origin</option>
+                <option value="strict-origin">strict-origin</option>
+                <option value="no-referrer-when-downgrade">no-referrer-when-downgrade</option>
+                <option value="origin-when-cross-origin">origin-when-cross-origin</option>
+                <option value="strict-origin-when-cross-origin">strict-origin-when-cross-origin</option>
+                <option value="same-origin">same-origin</option>
+              </select>
+            </label>
+            <label>
+              <span>Loading</span>
+              <select name="loading">
+                <option value="lazy">lazy</option>
+                <option value="eager">eager</option>
+              </select>
+            </label>
+          </div>
+
+          <fieldset class="sandbox">
+            <legend>Sandbox (security)</legend>
+            <div class="grid-3">
+              <label class="check"><input type="checkbox" name="sandbox_allow_same_origin" /> <span>allow-same-origin</span></label>
+              <label class="check"><input type="checkbox" name="sandbox_allow_scripts" /> <span>allow-scripts</span></label>
+              <label class="check"><input type="checkbox" name="sandbox_allow_forms" /> <span>allow-forms</span></label>
+              <label class="check"><input type="checkbox" name="sandbox_allow_popups" /> <span>allow-popups</span></label>
+              <label class="check"><input type="checkbox" name="sandbox_allow_modals" /> <span>allow-modals</span></label>
+              <label class="check"><input type="checkbox" name="sandbox_allow_presentation" /> <span>allow-presentation</span></label>
+            </div>
+            <small class="hint">No sandbox = fully trusted. Add flags to safely enable needed capabilities.</small>
+          </fieldset>
+
+          <div class="grid-3">
+            <label class="check">
+              <input type="checkbox" name="showborder" />
+              <span>Show border</span>
+            </label>
+            <label>
+              <span>Border radius</span>
+              <input type="number" name="radius" min="0" max="32" value="12" />
+            </label>
+            <label>
+              <span>Border color</span>
+              <input type="color" name="bordercolor" value="#1e293b" />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="button" id="generate" class="btn">Generate Code</button>
+            <button type="reset" class="btn btn-ghost">Reset</button>
+          </div>
+
+          <div class="output">
+            <h3>Embed Code</h3>
+            <textarea id="code" rows="7" readonly></textarea>
+            <div class="output-actions">
+              <button type="button" id="copy" class="btn btn-outline">Copy</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="preview" class="section">
+      <div class="container">
+        <h2>Live Preview</h2>
+        <div id="previewWrap" class="preview-wrap ratio-16x9">
+          <iframe id="previewFrame" title="Iframe preview" loading="lazy"></iframe>
+        </div>
+        <small class="hint">Resize the window to test responsiveness.</small>
+      </div>
+    </section>
+
+    <section id="about" class="section section-alt">
+      <div class="container about">
+        <div>
+          <h2>About</h2>
+          <p>A lightweight, minimal iframe code generator focused on clarity, security, and accessibility.</p>
+          <p>Supports responsive wrappers, sandbox flags, lazy loading, referrer policy, and quick copy.</p>
+        </div>
+        <div class="links">
+          <a href="https://embedcodegenerator.com/" rel="noopener nofollow" target="_blank" class="backlink">Embed Code Generator</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer">
+      <p>© <span id="year"></span> Iframe Generator</p>
+      <a href="#top" class="to-top" aria-label="Back to top">↑</a>
+    </div>
+  </footer>
+
+  <script>
+    const yearEl = document.getElementById('year');
+yearEl.textContent = new Date().getFullYear();
+
+const form = document.getElementById('genForm');
+const codeEl = document.getElementById('code');
+const previewFrame = document.getElementById('previewFrame');
+const previewWrap = document.getElementById('previewWrap');
+
+function buildSandboxAttr(f) {
+  const flags = [];
+  if (f.sandbox_allow_same_origin.checked) flags.push('allow-same-origin');
+  if (f.sandbox_allow_scripts.checked) flags.push('allow-scripts');
+  if (f.sandbox_allow_forms.checked) flags.push('allow-forms');
+  if (f.sandbox_allow_popups.checked) flags.push('allow-popups');
+  if (f.sandbox_allow_modals.checked) flags.push('allow-modals');
+  if (f.sandbox_allow_presentation.checked) flags.push('allow-presentation');
+  return flags.length ? ` sandbox="${flags.join(' ')}"` : '';
+}
+
+function buildStyle(showBorder, radius, borderColor) {
+  const parts = [];
+  if (showBorder) parts.push(`border:1px solid ${borderColor}`);
+  else parts.push('border:0');
+  if (radius) parts.push(`border-radius:${radius}px`);
+  return parts.length ? ` style="${parts.join('; ')}"` : '';
+}
+
+function sanitizeUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.href;
+  } catch {
+    return '';
+  }
+}
+
+function generateCode() {
+  const f = form;
+  const src = sanitizeUrl(f.src.value.trim());
+  const title = f.title.value.trim() || 'Embedded content';
+  const width = (f.width.value || '100%').trim();
+  const height = Math.max(parseInt(f.height.value || '400', 10) || 400, 100);
+  const responsive = f.responsive.checked;
+  const allowfullscreen = f.allowfullscreen.checked;
+  const referrerpolicy = f.referrerpolicy.value;
+  const loading = f.loading.value || 'lazy';
+  const showBorder = f.showborder.checked;
+  const radius = parseInt(f.radius.value || '12', 10) || 0;
+  const borderColor = f.bordercolor.value || '#1e293b';
+
+  if (!src) {
+    codeEl.value = '<!-- Enter a valid HTTPS URL to generate code -->';
+    previewFrame.removeAttribute('src');
+    return;
+  }
+
+  const sandboxAttr = buildSandboxAttr(f);
+  const allowFsAttr = allowfullscreen ? ' allow="fullscreen"' : '';
+  const referrerAttr = referrerpolicy ? ` referrerpolicy="${referrerpolicy}"` : '';
+  const loadingAttr = loading ? ` loading="${loading}"` : '';
+  const styleAttr = buildStyle(showBorder, radius, borderColor);
+
+  let iframeTag = `<iframe src="${src}" title="${title}" width="${width}" height="${height}"${allowFsAttr}${sandboxAttr}${referrerAttr}${loadingAttr}${styleAttr}></iframe>`;
+
+  if (responsive) {
+    const responsiveBlock = [
+      '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:' + radius + 'px;">',
+      `  <iframe src="${src}" title="${title}" allowtransparency="true"${allowFsAttr}${sandboxAttr}${referrerAttr}${loadingAttr} style="position:absolute;left:0;top:0;width:100%;height:100%;${showBorder ? 'border:1px solid ' + borderColor : 'border:0'};border-radius:${radius}px;"></iframe>`,
+      '</div>'
+    ].join('\n');
+    codeEl.value = responsiveBlock;
+  } else {
+    codeEl.value = iframeTag;
+  }
+
+  // Update preview
+  previewWrap.classList.toggle('ratio-16x9', responsive);
+  previewFrame.setAttribute('title', title);
+  previewFrame.setAttribute('loading', loading);
+  if (allowfullscreen) previewFrame.setAttribute('allow', 'fullscreen'); else previewFrame.removeAttribute('allow');
+
+  // sandbox flags for preview
+  if (sandboxAttr) {
+    previewFrame.setAttribute('sandbox', sandboxAttr.replace(' sandbox="', '').replace('"',''));
+  } else {
+    previewFrame.removeAttribute('sandbox');
+  }
+
+  // style for preview
+  previewFrame.style.border = showBorder ? `1px solid ${borderColor}` : '0';
+  previewFrame.style.borderRadius = `${radius}px`;
+  previewFrame.style.width = responsive ? '100%' : (width || '100%');
+  previewFrame.style.height = responsive ? '100%' : `${height}px`;
+
+  // finally set src last to reflect changes
+  previewFrame.src = src;
+}
+
+document.getElementById('generate').addEventListener('click', generateCode);
+
+// Generate on change for instant feedback
+form.addEventListener('input', (e) => {
+  if (['src','title','width','height','responsive','allowfullscreen','referrerpolicy','loading','showborder','radius','bordercolor'].includes(e.target.name) ||
+      e.target.name?.startsWith('sandbox_')) {
+    generateCode();
+  }
+});
+
+// Copy to clipboard
+document.getElementById('copy').addEventListener('click', async () => {
+  if (!codeEl.value.trim()) return;
+  try {
+    await navigator.clipboard.writeText(codeEl.value);
+    toast('Code copied');
+  } catch {
+    codeEl.select();
+    document.execCommand('copy');
+    toast('Code copied');
+  }
+});
+
+// Simple toast
+function toast(msg){
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.position='fixed';
+  el.style.bottom='20px';
+  el.style.left='50%';
+  el.style.transform='translateX(-50%)';
+  el.style.background='rgba(20,24,32,.95)';
+  el.style.color='var(--text)';
+  el.style.border='1px solid rgba(255,255,255,.12)';
+  el.style.padding='10px 14px';
+  el.style.borderRadius='10px';
+  el.style.zIndex='1000';
+  el.style.boxShadow='0 8px 24px rgba(0,0,0,.35)';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1600);
+}
+
+// Initial render
+generateCode();
+
+  </script>
+</body>
+</html>
